@@ -13,6 +13,10 @@ import { capitialize } from "../lib/utils";
 
 import FriendCard, { getLanguageFlag } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
+import GlassCard from "../components/ui/GlassCard";
+import Button from "../components/ui/Button";
+import Badge from "../components/ui/Badge";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -49,122 +53,141 @@ const HomePage = () => {
   }, [outgoingFriendReqs]);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <div className="container mx-auto space-y-10">
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Friends Section */}
+      <section className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Friends</h2>
-          <Link to="/notifications" className="btn btn-outline btn-sm">
-            <UsersIcon className="mr-2 size-4" />
-            Friend Requests
+          <div>
+            <h2 className="text-3xl font-bold text-neutral-900 dark:text-white">
+              Your Friends
+            </h2>
+            <p className="text-neutral-600 dark:text-neutral-300 mt-1">
+              Connect and practice with your language partners
+            </p>
+          </div>
+          <Link to="/notifications">
+            <Button variant="outline" size="sm">
+              <UsersIcon className="w-4 h-4 mr-2" />
+              Friend Requests
+            </Button>
           </Link>
         </div>
 
         {loadingFriends ? (
           <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-lg" />
+            <LoadingSpinner size="lg" className="text-primary-500" />
           </div>
         ) : friends.length === 0 ? (
           <NoFriendsFound />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {friends.map((friend) => (
               <FriendCard key={friend._id} friend={friend} />
             ))}
           </div>
         )}
+      </section>
 
-        <section>
-          <div className="mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Meet New Learners</h2>
-                <p className="opacity-70">
-                  Discover perfect language exchange partners based on your profile
-                </p>
-              </div>
-            </div>
+      {/* Recommended Users Section */}
+      <section className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold text-neutral-900 dark:text-white">
+            Meet New Learners
+          </h2>
+          <p className="text-neutral-600 dark:text-neutral-300 mt-1">
+            Discover perfect language exchange partners based on your profile
+          </p>
+        </div>
+
+        {loadingUsers ? (
+          <div className="flex justify-center py-12">
+            <LoadingSpinner size="lg" className="text-primary-500" />
           </div>
-
-          {loadingUsers ? (
-            <div className="flex justify-center py-12">
-              <span className="loading loading-spinner loading-lg" />
+        ) : recommendedUsers.length === 0 ? (
+          <GlassCard className="p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
+              <span className="text-2xl">🔍</span>
             </div>
-          ) : recommendedUsers.length === 0 ? (
-            <div className="card bg-base-200 p-6 text-center">
-              <h3 className="font-semibold text-lg mb-2">No recommendations available</h3>
-              <p className="text-base-content opacity-70">
-                Check back later for new language partners!
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recommendedUsers.map((user) => {
-                const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
+            <h3 className="font-semibold text-lg mb-2 text-neutral-900 dark:text-white">
+              No recommendations available
+            </h3>
+            <p className="text-neutral-600 dark:text-neutral-300">
+              Check back later for new language partners!
+            </p>
+          </GlassCard>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recommendedUsers.map((user) => {
+              const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
 
-                return (
-                  <div
-                    key={user._id}
-                    className="card bg-base-200 hover:shadow-lg transition-all duration-300"
-                  >
-                    <div className="card-body p-5 space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="avatar size-16 rounded-full">
-                          <img src={user.profilePic} alt={user.fullName} />
+              return (
+                <GlassCard key={user._id} className="p-6 animate-fade-in">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-primary-500/20">
+                      <img 
+                        src={user.profilePic} 
+                        alt={user.fullName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-neutral-900 dark:text-white">
+                        {user.fullName}
+                      </h3>
+                      {user.location && (
+                        <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                          <MapPinIcon className="w-3 h-3 mr-1" />
+                          {user.location}
                         </div>
-
-                        <div>
-                          <h3 className="font-semibold text-lg">{user.fullName}</h3>
-                          {user.location && (
-                            <div className="flex items-center text-xs opacity-70 mt-1">
-                              <MapPinIcon className="size-3 mr-1" />
-                              {user.location}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Languages with flags */}
-                      <div className="flex flex-wrap gap-1.5">
-                        <span className="badge badge-secondary">
-                          {getLanguageFlag(user.nativeLanguage)}
-                          Native: {capitialize(user.nativeLanguage)}
-                        </span>
-                        <span className="badge badge-outline">
-                          {getLanguageFlag(user.learningLanguage)}
-                          Learning: {capitialize(user.learningLanguage)}
-                        </span>
-                      </div>
-
-                      {user.bio && <p className="text-sm opacity-70">{user.bio}</p>}
-
-                      {/* Action button */}
-                      <button
-                        className={`btn w-full mt-2 ${
-                          hasRequestBeenSent ? "btn-disabled" : "btn-primary"
-                        } `}
-                        onClick={() => sendRequestMutation(user._id)}
-                        disabled={hasRequestBeenSent || isPending}
-                      >
-                        {hasRequestBeenSent ? (
-                          <>
-                            <CheckCircleIcon className="size-4 mr-2" />
-                            Request Sent
-                          </>
-                        ) : (
-                          <>
-                            <UserPlusIcon className="size-4 mr-2" />
-                            Send Friend Request
-                          </>
-                        )}
-                      </button>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      </div>
+
+                  {/* Languages */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <Badge variant="primary" size="sm">
+                      {getLanguageFlag(user.nativeLanguage)}
+                      Native: {capitialize(user.nativeLanguage)}
+                    </Badge>
+                    <Badge variant="secondary" size="sm">
+                      {getLanguageFlag(user.learningLanguage)}
+                      Learning: {capitialize(user.learningLanguage)}
+                    </Badge>
+                  </div>
+
+                  {user.bio && (
+                    <p className="text-sm text-neutral-600 dark:text-neutral-300 mb-4 line-clamp-2">
+                      {user.bio}
+                    </p>
+                  )}
+
+                  {/* Action button */}
+                  <Button
+                    variant={hasRequestBeenSent ? "ghost" : "primary"}
+                    className="w-full"
+                    onClick={() => sendRequestMutation(user._id)}
+                    disabled={hasRequestBeenSent || isPending}
+                    loading={isPending}
+                  >
+                    {hasRequestBeenSent ? (
+                      <>
+                        <CheckCircleIcon className="w-4 h-4 mr-2" />
+                        Request Sent
+                      </>
+                    ) : (
+                      <>
+                        <UserPlusIcon className="w-4 h-4 mr-2" />
+                        Send Friend Request
+                      </>
+                    )}
+                  </Button>
+                </GlassCard>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

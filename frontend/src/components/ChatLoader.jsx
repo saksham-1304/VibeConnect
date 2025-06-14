@@ -1,10 +1,12 @@
-import { LoaderIcon } from "lucide-react";
+import LoadingSpinner from "./ui/LoadingSpinner";
 
 function ChatLoader() {
   return (
     <div className="h-screen flex flex-col items-center justify-center p-4">
-      <LoaderIcon className="animate-spin size-10 text-primary" />
-      <p className="mt-4 text-center text-lg font-mono">Connecting to chat...</p>
+      <LoadingSpinner size="xl" className="text-primary-500 mb-4" />
+      <p className="text-center text-lg font-medium text-neutral-900 dark:text-white">
+        Connecting to chat...
+      </p>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router";
+import { useEffect } from "react";
 
 import HomePage from "./pages/HomePage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
@@ -17,15 +18,19 @@ import { useThemeStore } from "./store/useThemeStore.js";
 
 const App = () => {
   const { isLoading, authUser } = useAuthUser();
-  const { theme } = useThemeStore();
+  const { initializeTheme } = useThemeStore();
 
   const isAuthenticated = Boolean(authUser);
   const isOnboarded = authUser?.isOnboarded;
 
+  useEffect(() => {
+    initializeTheme();
+  }, [initializeTheme]);
+
   if (isLoading) return <PageLoader />;
 
   return (
-    <div className="h-screen" data-theme={theme}>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 transition-colors duration-300">
       <Routes>
         <Route
           path="/"
@@ -103,8 +108,20 @@ const App = () => {
         />
       </Routes>
 
-      <Toaster />
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: '#1f2937',
+          },
+        }}
+      />
     </div>
   );
 };
+
 export default App;
