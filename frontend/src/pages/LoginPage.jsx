@@ -1,118 +1,137 @@
 import { useState } from "react";
-import { useAuthStore } from "../store/useAuthStore";
-import AuthImagePattern from "../components/AuthImagePattern";
-import { Link } from "react-router-dom";
-import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
+import { ShipWheelIcon } from "lucide-react";
+import { Link } from "react-router";
+import useLogin from "../hooks/useLogin";
 
 const LoginPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
-  const { login, isLoggingIn } = useAuthStore();
 
-  const handleSubmit = async (e) => {
+  // This is how we did it at first, without using our custom hook
+  // const queryClient = useQueryClient();
+  // const {
+  //   mutate: loginMutation,
+  //   isPending,
+  //   error,
+  // } = useMutation({
+  //   mutationFn: login,
+  //   onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+  // });
+
+  // This is how we did it using our custom hook - optimized version
+  const { isPending, error, loginMutation } = useLogin();
+
+  const handleLogin = (e) => {
     e.preventDefault();
-    login(formData);
+    loginMutation(loginData);
   };
 
   return (
-    <div className="h-screen grid lg:grid-cols-2">
-      {/* Left Side - Form */}
-      <div className="flex flex-col justify-center items-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2 group">
-              <div
-                className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20
-              transition-colors"
-              >
-                <MessageSquare className="w-6 h-6 text-primary" />
-              </div>
-              <h1 className="text-2xl font-bold mt-2">Welcome Back</h1>
-              <p className="text-base-content/60">Sign in to your account</p>
-            </div>
+    <div
+      className="h-screen flex items-center justify-center p-4 sm:p-6 md:p-8"
+      data-theme="forest"
+    >
+      <div className="border border-primary/25 flex flex-col lg:flex-row w-full max-w-5xl mx-auto bg-base-100 rounded-xl shadow-lg overflow-hidden">
+        {/* LOGIN FORM SECTION */}
+        <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col">
+          {/* LOGO */}
+          <div className="mb-4 flex items-center justify-start gap-2">
+            <ShipWheelIcon className="size-9 text-primary" />
+            <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary  tracking-wider">
+              Streamify
+            </span>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Email</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-base-content/40" />
+          {/* ERROR MESSAGE DISPLAY */}
+          {error && (
+            <div className="alert alert-error mb-4">
+              <span>{error.response.data.message}</span>
+            </div>
+          )}
+
+          <div className="w-full">
+            <form onSubmit={handleLogin}>
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-xl font-semibold">Welcome Back</h2>
+                  <p className="text-sm opacity-70">
+                    Sign in to your account to continue your language journey
+                  </p>
                 </div>
-                <input
-                  type="email"
-                  className={`input input-bordered w-full pl-10`}
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
+
+                <div className="flex flex-col gap-3">
+                  <div className="form-control w-full space-y-2">
+                    <label className="label">
+                      <span className="label-text">Email</span>
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="hello@example.com"
+                      className="input input-bordered w-full"
+                      value={loginData.email}
+                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-control w-full space-y-2">
+                    <label className="label">
+                      <span className="label-text">Password</span>
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      className="input input-bordered w-full"
+                      value={loginData.password}
+                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <button type="submit" className="btn btn-primary w-full" disabled={isPending}>
+                    {isPending ? (
+                      <>
+                        <span className="loading loading-spinner loading-xs"></span>
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </button>
+
+                  <div className="text-center mt-4">
+                    <p className="text-sm">
+                      Don't have an account?{" "}
+                      <Link to="/signup" className="text-primary hover:underline">
+                        Create one
+                      </Link>
+                    </p>
+                  </div>
+                </div>
               </div>
+            </form>
+          </div>
+        </div>
+
+        {/* IMAGE SECTION */}
+        <div className="hidden lg:flex w-full lg:w-1/2 bg-primary/10 items-center justify-center">
+          <div className="max-w-md p-8">
+            {/* Illustration */}
+            <div className="relative aspect-square max-w-sm mx-auto">
+              <img src="/i.png" alt="Language connection illustration" className="w-full h-full" />
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Password</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-base-content/40" />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className={`input input-bordered w-full pl-10`}
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-base-content/40" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-base-content/40" />
-                  )}
-                </button>
-              </div>
+            <div className="text-center space-y-3 mt-6">
+              <h2 className="text-xl font-semibold">Connect with language partners worldwide</h2>
+              <p className="opacity-70">
+                Practice conversations, make friends, and improve your language skills together
+              </p>
             </div>
-
-            <button type="submit" className="btn btn-primary w-full" disabled={isLoggingIn}>
-              {isLoggingIn ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </button>
-          </form>
-
-          <div className="text-center">
-            <p className="text-base-content/60">
-              Don&apos;t have an account?{" "}
-              <Link to="/signup" className="link link-primary">
-                Create account
-              </Link>
-            </p>
           </div>
         </div>
       </div>
-
-      {/* Right Side - Image/Pattern */}
-      <AuthImagePattern
-        title={"Welcome back!"}
-        subtitle={"Sign in to continue your conversations and catch up with your messages."}
-      />
     </div>
   );
 };
